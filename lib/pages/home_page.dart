@@ -2161,21 +2161,51 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _startBreakTimer() {
-    _breakTimer?.cancel();
-    _alerted = false;
-    _breakTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
-      setState(() => _currentBreakDuration += const Duration(seconds: 1));
+//   void _startBreak() async {
+//   final result = await showModalBottomSheet<bool>(
+//     context: context,
+//     backgroundColor: Colors.transparent,
+//     builder: (ctx) => _buildConfirmSheet(ctx, 'Start Break?', 'Start'),
+//   );
+
+//   if (result == true) {
+//     final now = TimeOfDay.now();
+//     setState(() {
+//       activeBreak = BreakSession(title: 'Break ${breaks.length + 1}', start: now);
+//       breaks.add(activeBreak!);
+//       _currentBreakDuration = Duration.zero;
+//       _alerted = false;
+//     });
+//     await _saveHistory();
+
+//     // start the timer AFTER UI updates
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       _startBreakTimer();
+//     });
+//   }
+// }
+
+void _startBreakTimer() {
+  _breakTimer?.cancel();
+  _alerted = false;
+
+  _breakTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (mounted && activeBreak != null) {
+      setState(() {
+        _currentBreakDuration += const Duration(seconds: 1);
+      });
 
       if (remainingBreak.inSeconds <= 0 && !_alerted) {
         _alerted = true;
-
-
         _showOverBreakAlert();
         HapticFeedback.vibrate();
       }
-    });
-  }
+    } else {
+      timer.cancel(); 
+    }
+  });
+}
+
 
   void _showOverBreakAlert() {
     showDialog(
@@ -2386,7 +2416,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ]),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 60),
                 if (activeBreak != null) ...[
                   Text("Break Timer: ${formatDuration(_currentBreakDuration)}",
                       style: const TextStyle(
@@ -2394,11 +2424,9 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.w600,
                           fontSize: 18)),
                   const SizedBox(height: 8),
-                  Text("Remaining: ${formatDuration(remainingBreak)}",
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 16)),
-                  const SizedBox(height: 20),
+                  
                 ],
+                 const SizedBox(height: 60),
                 if (showEveningOut)
                   Container(
                     padding: const EdgeInsets.all(24),
@@ -2414,12 +2442,9 @@ class _HomePageState extends State<HomePage> {
                       _buildStatRow('Total Break Used',
                           formatDuration(totalBreakUsed), Colors.white),
                       const Divider(color: Color(0xFF3A3A3C)),
-                      _buildStatRow('Available Break',
-                          formatDuration(totalAvailableBreak),
-                          const Color(0xFF0A84FF)),
-                      const Divider(color: Color(0xFF3A3A3C)),
+                     
                       _buildStatRow(
-                          isBreakCovered ? 'Overtime Used' : 'Remaining Break',
+                          isBreakCovered ? 'Overtime Used' : 'Available Break',
                           formatDuration(isBreakCovered
                               ? overtimeUsed
                               : remainingBreak),
