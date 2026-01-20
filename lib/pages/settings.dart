@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,43 +23,37 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Load preset morning entry
       final presetMorningHour = prefs.getInt('preset_morning_hour') ?? 9;
       final presetMorningMinute = prefs.getInt('preset_morning_minute') ?? 30;
-      presetMorningEntry = TimeOfDay(hour: presetMorningHour, minute: presetMorningMinute);
+      presetMorningEntry = TimeOfDay(
+        hour: presetMorningHour,
+        minute: presetMorningMinute,
+      );
 
-      // Load preset evening out
       final presetEveningHour = prefs.getInt('preset_evening_hour') ?? 17;
       final presetEveningMinute = prefs.getInt('preset_evening_minute') ?? 30;
-      presetEveningOut = TimeOfDay(hour: presetEveningHour, minute: presetEveningMinute);
+      presetEveningOut = TimeOfDay(
+        hour: presetEveningHour,
+        minute: presetEveningMinute,
+      );
 
-      // Load break hours
       final breakMinutes = prefs.getInt('break_hours') ?? 60;
       breakHours = Duration(minutes: breakMinutes);
 
-      // Load working hours
-      final workingMinutes = prefs.getInt('working_hours') ?? 450; // 7.5 hours
+      final workingMinutes = prefs.getInt('working_hours') ?? 450;
       workingHours = Duration(minutes: workingMinutes);
     });
   }
 
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    
-    // Save preset morning entry
     await prefs.setInt('preset_morning_hour', presetMorningEntry.hour);
     await prefs.setInt('preset_morning_minute', presetMorningEntry.minute);
-    
-    // Save preset evening out
     await prefs.setInt('preset_evening_hour', presetEveningOut.hour);
     await prefs.setInt('preset_evening_minute', presetEveningOut.minute);
-    
-    // Save break hours
     await prefs.setInt('break_hours', breakHours.inMinutes);
-    
-    // Save working hours
     await prefs.setInt('working_hours', workingHours.inMinutes);
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -71,8 +62,6 @@ class _SettingsPageState extends State<SettingsPage> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      
-      // Pop with result to trigger reload in home page
       Navigator.pop(context, true);
     }
   }
@@ -88,18 +77,22 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF1A1A1A),
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Settings',
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF1A1A1A),
             fontWeight: FontWeight.w700,
             fontSize: 28,
             letterSpacing: -0.5,
@@ -108,406 +101,74 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: [
-          Container(
-            height: 0.5,
-            color: const Color(0xFF3A3A3C),
-          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                // Preset Morning Entry Time
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0A84FF).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.wb_sunny,
-                        color: Color(0xFF0A84FF),
-                        size: 24,
-                      ),
-                    ),
-                    title: const Text(
-                      'Preset Morning Entry',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        formatTime(presetMorningEntry),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white38,
-                    ),
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: presetMorningEntry,
-                        builder: (context, child) {
-                          return Theme(
-                            data: ThemeData.dark().copyWith(
-                              colorScheme: const ColorScheme.dark(
-                                primary: Color(0xFF0A84FF),
-                                onPrimary: Colors.white,
-                                surface: Color(0xFF1C1C1E),
-                                onSurface: Colors.white,
-                              ),
-                              dialogBackgroundColor: const Color(0xFF1C1C1E),
+                _buildSettingTile(
+                  icon: Icons.wb_sunny_rounded,
+                  iconColor: const Color(0xFF0A84FF),
+                  title: 'Preset Morning Entry',
+                  subtitle: formatTime(presetMorningEntry),
+                  onTap: () async {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: presetMorningEntry,
+                      builder: (context, child) {
+                        return Theme(
+                          data: ThemeData.light().copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: Color(0xFF1A1A1A),
+                              onPrimary: Colors.white,
+                              surface: Colors.white,
+                              onSurface: Color(0xFF1A1A1A),
                             ),
-                            child: child!,
-                          );
-                        },
-                      );
-                      if (time != null) {
-                        setState(() => presetMorningEntry = time);
-                      }
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (time != null) setState(() => presetMorningEntry = time);
+                  },
+                ),
+                _buildSettingTile(
+                  icon: Icons.work_rounded,
+                  iconColor: const Color(0xFFFF9F0A),
+                  title: 'Working Hours',
+                  subtitle: formatDuration(workingHours),
+                  onTap: () => _showMinutesDialog(
+                    'Set Working Hours',
+                    workingHours.inMinutes,
+                    (val) {
+                      setState(() => workingHours = Duration(minutes: val));
                     },
                   ),
                 ),
-
-                // Preset Evening Out Time
-                // Container(
-                //   margin: const EdgeInsets.only(bottom: 16),
-                //   decoration: BoxDecoration(
-                //     color: const Color(0xFF1C1C1E),
-                //     borderRadius: BorderRadius.circular(16),
-                //   ),
-                //   child: ListTile(
-                //     contentPadding: const EdgeInsets.symmetric(
-                //       horizontal: 20,
-                //       vertical: 12,
-                //     ),
-                //     leading: Container(
-                //       padding: const EdgeInsets.all(10),
-                //       decoration: BoxDecoration(
-                //         color: const Color(0xFFFF453A).withOpacity(0.2),
-                //         borderRadius: BorderRadius.circular(10),
-                //       ),
-                //       child: const Icon(
-                //         Icons.nightlight_round,
-                //         color: Color(0xFFFF453A),
-                //         size: 24,
-                //       ),
-                //     ),
-                //     title: const Text(
-                //       'Preset Evening Out',
-                //       style: TextStyle(
-                //         fontSize: 16,
-                //         fontWeight: FontWeight.w600,
-                //         color: Colors.white,
-                //       ),
-                //     ),
-                //     subtitle: Padding(
-                //       padding: const EdgeInsets.only(top: 4),
-                //       child: Text(
-                //         formatTime(presetEveningOut),
-                //         style: const TextStyle(
-                //           fontSize: 14,
-                //           color: Colors.white54,
-                //         ),
-                //       ),
-                //     ),
-                //     trailing: const Icon(
-                //       Icons.chevron_right,
-                //       color: Colors.white38,
-                //     ),
-                //     onTap: () async {
-                //       final time = await showTimePicker(
-                //         context: context,
-                //         initialTime: presetEveningOut,
-                //         builder: (context, child) {
-                //           return Theme(
-                //             data: ThemeData.dark().copyWith(
-                //               colorScheme: const ColorScheme.dark(
-                //                 primary: Color(0xFF0A84FF),
-                //                 onPrimary: Colors.white,
-                //                 surface: Color(0xFF1C1C1E),
-                //                 onSurface: Colors.white,
-                //               ),
-                //               dialogBackgroundColor: const Color(0xFF1C1C1E),
-                //             ),
-                //             child: child!,
-                //           );
-                //         },
-                //       );
-                //       if (time != null) {
-                //         setState(() => presetEveningOut = time);
-                //       }
-                //     },
-                //   ),
-                // ),
-
-                // Working Hours Duration
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF9F0A).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.work,
-                        color: Color(0xFFFF9F0A),
-                        size: 24,
-                      ),
-                    ),
-                    title: const Text(
-                      'Working Hours',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        formatDuration(workingHours),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white38,
-                    ),
-                    onTap: () async {
-                      final controller = TextEditingController(
-                        text: workingHours.inMinutes.toString(),
-                      );
-                      final result = await showDialog<int>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: const Color(0xFF1C1C1E),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          title: const Text(
-                            'Set Working Hours',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          content: TextField(
-                            controller: controller,
-                            keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              hintText: 'Enter minutes',
-                              hintStyle: TextStyle(color: Colors.white38),
-                              suffix: Text(
-                                'minutes',
-                                style: TextStyle(color: Colors.white54),
-                              ),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF3A3A3C)),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF0A84FF)),
-                              ),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                final minutes = int.tryParse(controller.text);
-                                Navigator.pop(ctx, minutes);
-                              },
-                              child: const Text(
-                                'Save',
-                                style: TextStyle(
-                                  color: Color(0xFF0A84FF),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (result != null && result > 0) {
-                        setState(() => workingHours = Duration(minutes: result));
-                      }
+                _buildSettingTile(
+                  icon: Icons.coffee_rounded,
+                  iconColor: const Color(0xFF30D158),
+                  title: 'Break Duration',
+                  subtitle: formatDuration(breakHours),
+                  onTap: () => _showMinutesDialog(
+                    'Set Break Duration',
+                    breakHours.inMinutes,
+                    (val) {
+                      setState(() => breakHours = Duration(minutes: val));
                     },
                   ),
                 ),
-
-                // Break Duration
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF30D158).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.coffee,
-                        color: Color(0xFF30D158),
-                        size: 24,
-                      ),
-                    ),
-                    title: const Text(
-                      'Break Duration',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        formatDuration(breakHours),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white38,
-                    ),
-                    onTap: () async {
-                      final controller = TextEditingController(
-                        text: breakHours.inMinutes.toString(),
-                      );
-                      final result = await showDialog<int>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: const Color(0xFF1C1C1E),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          title: const Text(
-                            'Set Break Duration',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          content: TextField(
-                            controller: controller,
-                            keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
-                              hintText: 'Enter minutes',
-                              hintStyle: TextStyle(color: Colors.white38),
-                              suffix: Text(
-                                'minutes',
-                                style: TextStyle(color: Colors.white54),
-                              ),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF3A3A3C)),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF0A84FF)),
-                              ),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                final minutes = int.tryParse(controller.text);
-                                Navigator.pop(ctx, minutes);
-                              },
-                              child: const Text(
-                                'Save',
-                                style: TextStyle(
-                                  color: Color(0xFF0A84FF),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                      if (result != null && result > 0) {
-                        setState(() => breakHours = Duration(minutes: result));
-                      }
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Save Button
+                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveSettings,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0A84FF),
+                      backgroundColor: const Color(0xFF1A1A1A),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: const Text(
@@ -525,5 +186,119 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildSettingTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            subtitle,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: Color(0xFFC7C7CC)),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Future<void> _showMinutesDialog(
+    String title,
+    int initialValue,
+    Function(int) onSave,
+  ) async {
+    final controller = TextEditingController(text: initialValue.toString());
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A1A),
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          style: const TextStyle(color: Color(0xFF1A1A1A)),
+          decoration: const InputDecoration(
+            hintText: 'Enter minutes',
+            suffix: Text('min', style: TextStyle(color: Color(0xFF666666))),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFF2F2F7)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF0A84FF)),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Color(0xFF666666),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final val = int.tryParse(controller.text);
+              if (val != null) Navigator.pop(ctx, val);
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Color(0xFF0A84FF),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result > 0) onSave(result);
   }
 }

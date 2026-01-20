@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -86,6 +84,7 @@ class _NotepadPageState extends State<NotepadPage> {
         const SnackBar(
           content: Text('Please add start time and note!'),
           backgroundColor: Color(0xFFFF453A),
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -109,11 +108,11 @@ class _NotepadPageState extends State<NotepadPage> {
     });
 
     _saveSessions();
-    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Session saved!'),
         backgroundColor: Color(0xFF30D158),
+        behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: 1),
       ),
     );
@@ -123,23 +122,18 @@ class _NotepadPageState extends State<NotepadPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Delete Session?',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A1A),
           ),
         ),
         content: const Text(
           'This will permanently delete this work session.',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 15, color: Color(0xFF666666)),
         ),
         actions: [
           TextButton(
@@ -147,16 +141,14 @@ class _NotepadPageState extends State<NotepadPage> {
             child: const Text(
               'Cancel',
               style: TextStyle(
-                color: Colors.white70,
+                color: Color(0xFF666666),
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           TextButton(
             onPressed: () {
-              setState(() {
-                _sessions.removeAt(index);
-              });
+              setState(() => _sessions.removeAt(index));
               _saveSessions();
               Navigator.pop(ctx);
             },
@@ -173,54 +165,19 @@ class _NotepadPageState extends State<NotepadPage> {
     );
   }
 
-  Future<void> _addEndTime(int index) async {
-    final session = _sessions[index];
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: session.endTime ?? TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF0A84FF),
-              onPrimary: Colors.white,
-              surface: Color(0xFF1C1C1E),
-              onSurface: Colors.white,
-            ),
-            dialogBackgroundColor: const Color(0xFF1C1C1E),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        _sessions[index] = WorkSession(
-          startTime: session.startTime,
-          endTime: picked,
-          note: session.note,
-          createdAt: session.createdAt,
-        );
-      });
-      _saveSessions();
-    }
-  }
-
   Future<void> _pickTime(bool isStart) async {
     final picked = await showTimePicker(
       context: context,
       initialTime: (isStart ? _startTime : _endTime) ?? TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF0A84FF),
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF1A1A1A),
               onPrimary: Colors.white,
-              surface: Color(0xFF1C1C1E),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF1A1A1A),
             ),
-            dialogBackgroundColor: const Color(0xFF1C1C1E),
           ),
           child: child!,
         );
@@ -229,19 +186,16 @@ class _NotepadPageState extends State<NotepadPage> {
 
     if (picked != null) {
       setState(() {
-        if (isStart) {
+        if (isStart)
           _startTime = picked;
-        } else {
+        else
           _endTime = picked;
-        }
       });
     }
   }
 
-  String _formatTime(TimeOfDay? time) {
-    if (time == null) return '--:--';
-    return time.format(context);
-  }
+  String _formatTime(TimeOfDay? time) =>
+      time == null ? '--:--' : time.format(context);
 
   Duration? _calculateDuration(TimeOfDay start, TimeOfDay? end) {
     if (end == null) return null;
@@ -260,20 +214,27 @@ class _NotepadPageState extends State<NotepadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: Colors.white,
         leading: _isEditing
             ? IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: const Icon(Icons.close_rounded, color: Color(0xFF1A1A1A)),
                 onPressed: _cancelEditing,
               )
-            : null,
+            : IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Color(0xFF1A1A1A),
+                  size: 20,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
         title: Text(
           _isEditing ? 'New Session' : 'Work Sessions',
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFF1A1A1A),
             fontWeight: FontWeight.w700,
             fontSize: 28,
             letterSpacing: -0.5,
@@ -282,28 +243,29 @@ class _NotepadPageState extends State<NotepadPage> {
         actions: _isEditing
             ? [
                 IconButton(
-                  icon: const Icon(Icons.check, color: Color(0xFF0A84FF)),
+                  icon: const Icon(
+                    Icons.check_rounded,
+                    color: Color(0xFF0A84FF),
+                    size: 28,
+                  ),
                   onPressed: _saveSession,
                 ),
               ]
             : null,
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 0.5,
-            color: const Color(0xFF3A3A3C),
-          ),
-          Expanded(
-            child: _isEditing ? _buildEditView() : _buildListView(),
-          ),
-        ],
-      ),
+      body: _isEditing ? _buildEditView() : _buildListView(),
       floatingActionButton: !_isEditing
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: _startNewSession,
-              backgroundColor: const Color(0xFF0A84FF),
-              child: const Icon(Icons.add, color: Colors.white),
+              backgroundColor: const Color(0xFF1A1A1A),
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: const Text(
+                'Add Session',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             )
           : null,
     );
@@ -315,121 +277,71 @@ class _NotepadPageState extends State<NotepadPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Time Selection
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1E),
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 15,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
-                GestureDetector(
-                  onTap: () => _pickTime(true),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2C2C2E),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.login, color: Color(0xFF0A84FF), size: 22),
-                            SizedBox(width: 12),
-                            Text(
-                              'Start Time',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          _formatTime(_startTime),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: _startTime != null
-                                ? const Color(0xFF0A84FF)
-                                : Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildTimeSelector(
+                  'Start Time',
+                  _startTime,
+                  const Color(0xFF0A84FF),
+                  Icons.login_rounded,
+                  () => _pickTime(true),
                 ),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () => _pickTime(false),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2C2C2E),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.logout, color: Color(0xFFFF453A), size: 22),
-                            SizedBox(width: 12),
-                            Text(
-                              'End Time (Optional)',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          _formatTime(_endTime),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: _endTime != null
-                                ? const Color(0xFFFF453A)
-                                : Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(color: Color(0xFFF2F2F7), height: 1),
+                ),
+                _buildTimeSelector(
+                  'End Time (Optional)',
+                  _endTime,
+                  const Color(0xFFFF453A),
+                  Icons.logout_rounded,
+                  () => _pickTime(false),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          
-          // Note Input
+          const SizedBox(height: 24),
           const Text(
             'Work Notes',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A1A),
             ),
           ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1E),
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 15,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: TextField(
               controller: _noteController,
-              maxLines: 10,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              maxLines: 8,
+              style: const TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
               decoration: const InputDecoration(
                 hintText: 'What did you work on?',
-                hintStyle: TextStyle(color: Colors.white38),
+                hintStyle: TextStyle(color: Color(0xFFC7C7CC)),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(20),
               ),
@@ -440,17 +352,75 @@ class _NotepadPageState extends State<NotepadPage> {
     );
   }
 
+  Widget _buildTimeSelector(
+    String label,
+    TimeOfDay? time,
+    Color color,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        color: Colors.transparent,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              _formatTime(time),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: time != null ? color : const Color(0xFFC7C7CC),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildListView() {
     if (_sessions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.note_add, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
+            Icon(
+              Icons.note_add_rounded,
+              size: 72,
+              color: const Color(0xFFC7C7CC).withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            const Text(
               'No work sessions yet',
-              style: TextStyle(fontSize: 18, color: Colors.white38),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC7C7CC),
+              ),
             ),
           ],
         ),
@@ -463,148 +433,102 @@ class _NotepadPageState extends State<NotepadPage> {
       itemBuilder: (context, index) {
         final session = _sessions[index];
         final duration = _calculateDuration(session.startTime, session.endTime);
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
-            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+                    child: Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0A84FF).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _formatTime(session.startTime),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF0A84FF),
-                            ),
+                        _buildTimeChip(
+                          _formatTime(session.startTime),
+                          const Color(0xFF0A84FF),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Color(0xFFC7C7CC),
+                            size: 16,
                           ),
                         ),
-                        const Icon(Icons.arrow_forward, color: Colors.white38, size: 16),
                         if (session.endTime != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF453A).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _formatTime(session.endTime),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFFF453A),
-                              ),
-                            ),
-                          )
-                        else
-                          GestureDetector(
-                            onTap: () => _addEndTime(index),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF3A3A3C),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: const Color(0xFF0A84FF).withOpacity(0.3),
-                                ),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.add, color: Color(0xFF0A84FF), size: 14),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Add End',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF0A84FF),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          _buildTimeChip(
+                            _formatTime(session.endTime),
+                            const Color(0xFFFF453A),
                           ),
                       ],
                     ),
                   ),
                   Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: Color(0xFF0A84FF)),
+                        icon: const Icon(
+                          Icons.edit_note_rounded,
+                          color: Color(0xFF0A84FF),
+                          size: 26,
+                        ),
                         onPressed: () => _editSession(index),
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Color(0xFFFF453A)),
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Color(0xFFFF453A),
+                          size: 24,
+                        ),
                         onPressed: () => _deleteSession(index),
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
                 ],
               ),
-              
               if (duration != null) ...[
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF30D158).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
+                    color: const Color(0xFF30D158).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     'Duration: ${_formatDuration(duration)}',
                     style: const TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: Color(0xFF30D158),
                     ),
                   ),
                 ),
               ],
-              
-              const SizedBox(height: 16),
-              const Divider(height: 1, color: Color(0xFF3A3A3C)),
-              const SizedBox(height: 16),
-              
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Divider(color: Color(0xFFF2F2F7), height: 1),
+              ),
               Text(
                 session.note,
                 style: const TextStyle(
                   fontSize: 15,
-                  color: Colors.white,
+                  color: Color(0xFF1A1A1A),
                   height: 1.5,
                 ),
               ),
@@ -612,6 +536,24 @@ class _NotepadPageState extends State<NotepadPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTimeChip(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -630,26 +572,20 @@ class WorkSession {
   });
 
   Map<String, dynamic> toJson() => {
-        'startHour': startTime.hour,
-        'startMinute': startTime.minute,
-        'endHour': endTime?.hour,
-        'endMinute': endTime?.minute,
-        'note': note,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'startHour': startTime.hour,
+    'startMinute': startTime.minute,
+    'endHour': endTime?.hour,
+    'endMinute': endTime?.minute,
+    'note': note,
+    'createdAt': createdAt.toIso8601String(),
+  };
 
   factory WorkSession.fromJson(Map<String, dynamic> json) => WorkSession(
-        startTime: TimeOfDay(
-          hour: json['startHour'],
-          minute: json['startMinute'],
-        ),
-        endTime: json['endHour'] != null
-            ? TimeOfDay(
-                hour: json['endHour'],
-                minute: json['endMinute'],
-              )
-            : null,
-        note: json['note'],
-        createdAt: DateTime.parse(json['createdAt']),
-      );
+    startTime: TimeOfDay(hour: json['startHour'], minute: json['startMinute']),
+    endTime: json['endHour'] != null
+        ? TimeOfDay(hour: json['endHour'], minute: json['endMinute'])
+        : null,
+    note: json['note'],
+    createdAt: DateTime.parse(json['createdAt']),
+  );
 }

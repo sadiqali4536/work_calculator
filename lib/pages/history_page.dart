@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:working_hour_time_calculator/data_store.dart';
@@ -37,7 +36,11 @@ class _HistoryPageState extends State<HistoryPage> {
     return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}";
   }
 
-  Future<void> _editBreakTime(int historyIndex, int breakIndex, bool isStart) async {
+  Future<void> _editBreakTime(
+    int historyIndex,
+    int breakIndex,
+    bool isStart,
+  ) async {
     final history = DataStore.instance.history;
     final breakData = history[historyIndex].breaks[breakIndex];
     final currentTime = isStart ? breakData.start : breakData.end;
@@ -47,14 +50,13 @@ class _HistoryPageState extends State<HistoryPage> {
       initialTime: currentTime ?? TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF0A84FF),
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF1A1A1A),
               onPrimary: Colors.white,
-              surface: Color(0xFF1C1C1E),
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF1A1A1A),
             ),
-            dialogBackgroundColor: const Color(0xFF1C1C1E),
           ),
           child: child!,
         );
@@ -62,18 +64,16 @@ class _HistoryPageState extends State<HistoryPage> {
     );
 
     if (picked != null) {
-      // Calculate new duration
       final startTime = isStart ? picked : breakData.start;
       final endTime = isStart ? breakData.end : picked;
-      
+
       Duration newDuration = Duration.zero;
       if (startTime != null && endTime != null) {
         final start = DateTime(2000, 1, 1, startTime.hour, startTime.minute);
         final end = DateTime(2000, 1, 1, endTime.hour, endTime.minute);
         newDuration = end.difference(start);
       }
-      
-      // Create updated break with new time and recalculated duration
+
       final updatedBreak = BreakSnapshot(
         title: breakData.title,
         start: startTime,
@@ -81,17 +81,10 @@ class _HistoryPageState extends State<HistoryPage> {
         duration: newDuration,
         note: breakData.note,
       );
-      
-      // Update the break in the history entry directly
+
       history[historyIndex].breaks[breakIndex] = updatedBreak;
-      
-      // Save to persist changes
       await DataStore.instance.save();
-      
-      // CRITICAL: Notify listeners so HomePage updates immediately
       DataStore.instance.notifyListeners();
-      
-      // Trigger UI update
       setState(() {});
     }
   }
@@ -100,23 +93,18 @@ class _HistoryPageState extends State<HistoryPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Delete Entry?',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A1A),
           ),
         ),
         content: const Text(
           'This will permanently delete this history entry.',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 15, color: Color(0xFF666666)),
         ),
         actions: [
           TextButton(
@@ -124,7 +112,7 @@ class _HistoryPageState extends State<HistoryPage> {
             child: const Text(
               'Cancel',
               style: TextStyle(
-                color: Colors.white70,
+                color: Color(0xFF666666),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -151,23 +139,18 @@ class _HistoryPageState extends State<HistoryPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text(
           'Delete Break?',
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A1A),
           ),
         ),
         content: const Text(
           'This will permanently delete this break from history.',
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.white70,
-          ),
+          style: TextStyle(fontSize: 15, color: Color(0xFF666666)),
         ),
         actions: [
           TextButton(
@@ -175,7 +158,7 @@ class _HistoryPageState extends State<HistoryPage> {
             child: const Text(
               'Cancel',
               style: TextStyle(
-                color: Colors.white70,
+                color: Color(0xFF666666),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -185,10 +168,7 @@ class _HistoryPageState extends State<HistoryPage> {
               final history = DataStore.instance.history;
               history[historyIndex].breaks.removeAt(breakIndex);
               await DataStore.instance.save();
-              
-              // CRITICAL: Notify listeners so HomePage updates immediately
               DataStore.instance.notifyListeners();
-              
               Navigator.pop(ctx);
               setState(() {});
             },
@@ -209,259 +189,271 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     final history = DataStore.instance.history;
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF000000),
-        
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF1A1A1A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
           "History",
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF1A1A1A),
             fontWeight: FontWeight.w700,
             fontSize: 28,
             letterSpacing: -0.5,
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 0.5,
-            color: const Color(0xFF3A3A3C),
-          ),
-          Expanded(
-            child: history.isEmpty
-                ? const Center(
-                    child: Text(
-                      "No history yet.",
-                      style: TextStyle(fontSize: 18, color: Colors.white38),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: history.length,
-                    itemBuilder: (context, index) {
-                      final h = history[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1C1C1E),
-                          borderRadius: BorderRadius.circular(16),
+      body: history.isEmpty
+          ? const Center(
+              child: Text(
+                "No history yet.",
+                style: TextStyle(fontSize: 18, color: Color(0xFFC7C7CC)),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: history.length,
+              itemBuilder: (context, index) {
+                final h = history[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 15,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            DateFormat("dd MMM yyyy").format(h.date),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: Color(0xFFFF453A),
+                            ),
+                            onPressed: () => _showDeleteDialog(index),
+                          ),
+                        ],
+                      ),
+                      const Divider(color: Color(0xFFF2F2F7), height: 32),
+                      if (h.morningEntry != null)
+                        _buildInfoRow(
+                          'Morning Entry',
+                          formatTime(h.morningEntry, context),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      if (h.eveningOut != null) ...[
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          'Evening Out',
+                          formatTime(h.eveningOut, context),
+                        ),
+                      ],
+                      if (h.breaks.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Breaks',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...h.breaks.asMap().entries.map((entry) {
+                          final breakIndex = entry.key;
+                          final b = entry.value;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF9F9F9),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFF2F2F7),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  DateFormat("dd MMM yyyy").format(h.date),
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0A84FF),
-                                  ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      b.title,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                        color: Color(0xFF1A1A1A),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        if (b.duration != Duration.zero)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(
+                                                0xFF0A84FF,
+                                              ).withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              formatDuration(b.duration),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0A84FF),
+                                              ),
+                                            ),
+                                          ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                          onTap: () => _showDeleteBreakDialog(
+                                            index,
+                                            breakIndex,
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: const Color(
+                                                0xFFFF453A,
+                                              ).withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: const Icon(
+                                              Icons.delete_outline_rounded,
+                                              size: 18,
+                                              color: Color(0xFFFF453A),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Color(0xFFFF453A),
-                                  ),
-                                  onPressed: () => _showDeleteDialog(index),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildTimeEditBox(
+                                        'Start',
+                                        formatTime(b.start, context),
+                                        () => _editBreakTime(
+                                          index,
+                                          breakIndex,
+                                          true,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _buildTimeEditBox(
+                                        'End',
+                                        formatTime(b.end, context),
+                                        b.end != null
+                                            ? () => _editBreakTime(
+                                                index,
+                                                breakIndex,
+                                                false,
+                                              )
+                                            : null,
+                                        isDimmed: b.end == null,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
-                            if (h.morningEntry != null)
-                              _buildInfoRow(
-                                'Morning Entry',
-                                formatTime(h.morningEntry, context),
-                              ),
-                            const SizedBox(height: 12),
-                            if (h.breaks.isNotEmpty) ...[
-                              const Text(
-                                'Breaks',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              ...h.breaks.asMap().entries.map((entry) {
-                                final breakIndex = entry.key;
-                                final b = entry.value;
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2C2C2E),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            b.title,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 15,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              if (b.duration != Duration.zero)
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFF0A84FF).withOpacity(0.2),
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                  child: Text(
-                                                    formatDuration(b.duration),
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Color(0xFF0A84FF),
-                                                    ),
-                                                  ),
-                                                ),
-                                              const SizedBox(width: 8),
-                                              GestureDetector(
-                                                onTap: () => _showDeleteBreakDialog(index, breakIndex),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(6),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color(0xFFFF453A).withOpacity(0.1),
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.delete_outline,
-                                                    size: 18,
-                                                    color: Color(0xFFFF453A),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: () => _editBreakTime(index, breakIndex, true),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                  color: const Color(0xFF3A3A3C),
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text(
-                                                      'Start',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.white54,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          formatTime(b.start, context),
-                                                          style: const TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight: FontWeight.w600,
-                                                            color: Colors.white,
-                                                          ),
-                                                        ),
-                                                        const Icon(
-                                                          Icons.edit,
-                                                          size: 16,
-                                                          color: Color(0xFF0A84FF),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: b.end != null 
-                                                  ? () => _editBreakTime(index, breakIndex, false)
-                                                  : null,
-                                              child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                  color: const Color(0xFF3A3A3C),
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text(
-                                                      'End',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.white54,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          formatTime(b.end, context),
-                                                          style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight: FontWeight.w600,
-                                                            color: b.end != null ? Colors.white : Colors.white38,
-                                                          ),
-                                                        ),
-                                                        if (b.end != null)
-                                                          const Icon(
-                                                            Icons.edit,
-                                                            size: 16,
-                                                            color: Color(0xFF0A84FF),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ],
-                          ],
-                        ),
-                      );
-                    },
+                          );
+                        }).toList(),
+                      ],
+                    ],
                   ),
-          ),
-        ],
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildTimeEditBox(
+    String label,
+    String value,
+    VoidCallback? onTap, {
+    bool isDimmed = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF2F2F7)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF666666),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDimmed ? Color(0xFFC7C7CC) : Color(0xFF1A1A1A),
+                  ),
+                ),
+                if (onTap != null)
+                  const Icon(
+                    Icons.edit_rounded,
+                    size: 14,
+                    color: Color(0xFF0A84FF),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -475,15 +467,15 @@ class _HistoryPageState extends State<HistoryPage> {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Colors.white70,
+            color: Color(0xFF666666),
           ),
         ),
         Text(
           value,
           style: const TextStyle(
             fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A1A),
           ),
         ),
       ],

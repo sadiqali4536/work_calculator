@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:working_hour_time_calculator/data_store.dart';
 import 'package:working_hour_time_calculator/pages/note_pad.dart';
@@ -18,21 +16,22 @@ class WorkBreakApp extends StatelessWidget {
     return MaterialApp(
       title: "Work & Break Tracker",
       theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF000000),
-        primaryColor: const Color(0xFF0A84FF),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF0A84FF),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+        primaryColor: const Color(0xFF1A1A1A),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF1A1A1A),
           secondary: Color(0xFF0A84FF),
-          surface: Color(0xFF1C1C1E),
-          background: Color(0xFF000000),
+          surface: Colors.white,
+          background: Color(0xFFF5F5F5),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF000000),
+          backgroundColor: Colors.white,
           elevation: 0,
-          iconTheme: IconThemeData(color: Colors.white),
+          centerTitle: false,
+          iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
           titleTextStyle: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF1A1A1A),
             fontSize: 28,
             fontWeight: FontWeight.w700,
           ),
@@ -58,11 +57,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    pages = const [
-      HomePage(),
-      HistoryPage(),
-      NotepadPage(),
-    ];
+    pages = const [HomePage(), HistoryPage(), NotepadPage()];
     DataStore.instance.load();
   }
 
@@ -71,32 +66,33 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000000),
+      backgroundColor: const Color(0xFFF5F5F5),
       body: IndexedStack(index: selectedIndex, children: pages),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1E),
-          border: Border(
-            top: BorderSide(
-              color: const Color(0xFF3A3A3C).withOpacity(0.3),
-              width: 0.5,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
             ),
-          ),
+          ],
         ),
         child: SafeArea(
           child: BottomNavigationBar(
             currentIndex: selectedIndex,
-            selectedItemColor: const Color(0xFF0A84FF),
-            unselectedItemColor: Colors.white38,
-            backgroundColor: Colors.transparent,
+            selectedItemColor: const Color(0xFF1A1A1A),
+            unselectedItemColor: const Color(0xFFC7C7CC),
+            backgroundColor: Colors.white,
             elevation: 0,
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               fontSize: 12,
             ),
             unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
             onTap: onNavTap,
@@ -104,21 +100,21 @@ class _MainPageState extends State<MainPage> {
               BottomNavigationBarItem(
                 icon: Padding(
                   padding: EdgeInsets.only(bottom: 4),
-                  child: Icon(Icons.timer, size: 26),
+                  child: Icon(Icons.timer_rounded, size: 26),
                 ),
                 label: "Tracker",
               ),
               BottomNavigationBarItem(
                 icon: Padding(
                   padding: EdgeInsets.only(bottom: 4),
-                  child: Icon(Icons.history, size: 26),
+                  child: Icon(Icons.history_rounded, size: 26),
                 ),
                 label: "History",
               ),
               BottomNavigationBarItem(
                 icon: Padding(
                   padding: EdgeInsets.only(bottom: 4),
-                  child: Icon(Icons.note_alt_outlined, size: 26),
+                  child: Icon(Icons.note_alt_rounded, size: 26),
                 ),
                 label: "Work Pad",
               ),
